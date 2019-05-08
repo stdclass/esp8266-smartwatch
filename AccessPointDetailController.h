@@ -1,21 +1,23 @@
-#ifndef _ACCESSPOINTSCONTROLLER_H
-#define _ACCESSPOINTSCONTROLLER_H
+#ifndef _ACCESSPOINTDETAILCONTROLLER_H
+#define _ACCESSPOINTDETAILCONTROLLER_H
 
 #include <Arduino.h>
 #include <U8g2lib.h>
+#include "ESP8266WiFi.h"
 #include "BaseController.h"
 #include "Menu.h"
 #include "ListAccessPointsController.h"
 #include "SimpleList.h"
 
-class AccessPointsController : public BaseController
+class AccessPointDetailController : public BaseController
 {
   private:
     Menu menu;
     U8G2 dsp;
+    int wifiIndex;
 
   public:
-    AccessPointsController(U8G2 _dsp);
+    AccessPointDetailController(U8G2 _dsp, int _wifiIndex);
     void render();
     void buttonSelect(SimpleList<BaseController *> *controllers);
     void buttonDown();
@@ -23,4 +25,4 @@ class AccessPointsController : public BaseController
 };
 
 
-#endif // _ACCESSPOINTSCONTROLLER_H
+#endif // _ACCESSPOINTDETAILCONTROLLER_H

@@ -3,21 +3,22 @@
 
 #include <Arduino.h>
 #include <U8g2lib.h>
-#include"BaseController.h"
+#include "BaseController.h"
 #include "Menu.h"
-#include "StackArray.h"
+#include "SimpleList.h"
 #include "AccessPointsController.h"
 
 class HomeController : public BaseController
 {
   private:
     Menu menu;
-    StackArray<BaseController *> menuControllers;
+    U8G2 dsp;
+    SimpleList<BaseController *> menuControllers;
 
   public:
-    HomeController(U8G2 dsp);
+    HomeController(U8G2 _dsp);
     void render();
-    void buttonSelect(StackArray<BaseController *> *controllers);
+    void buttonSelect(SimpleList<BaseController *> *controllers);
     void buttonDown();
     void buttonUp();
 };

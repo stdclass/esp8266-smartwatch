@@ -5,13 +5,23 @@
 
 Menu::Menu()
 {
-  activeItem = 0;
+  activeIndex = 0;
+  lastActiveIndex = -1;
   translateY = 0;
+
+  items = new SimpleList<MenuItem *>;
 }
 
-void Menu::addItem(char *title)
+int Menu::getOffsetTop(int itemIndex)
 {
-  items.push(title);
+  return (MENU_ITEM_SIZE * itemIndex) + MENU_ITEM_SIZE + translateY;
+}
+
+void Menu::addItem(String title, bool selectable)
+{
+  MenuItem *item = new MenuItem(title, selectable);
+  
+  items->add(item);
 }
 
 void Menu::setDisplay(U8G2 dsp)
@@ -21,22 +31,32 @@ void Menu::setDisplay(U8G2 dsp)
 
 void Menu::render()
 {
+
+  if( lastActiveIndex == activeIndex ){
+    //return;
+  }
+
+  lastActiveIndex = activeIndex;
   
   u8g2.clearBuffer();
   u8g2.setFont(u8g2_font_mercutio_basic_nbp_t_all);
 
-  for( int i = 0; i < items.count(); i++ ){
+  for( int i = 0; i < items->size(); i++ ){
     
-    int posY = (MENU_ITEM_SIZE * i) + MENU_ITEM_SIZE + translateY;
-    int posX = activeItem == i ? 10 : 0;
+    int posY = getOffsetTop(i);
 
-    if( posY < 0 || posY > ( u8g2.getDisplayHeight() + MENU_ITEM_SIZE ) ){
+    if( posY < 0 || posY > ( u8g2.getDisplayHeight() ) ){
       continue;
     }
     
-    u8g2.drawStr(posX, posY, items.at(i));
+    MenuItem *item = items->get(i);
 
-    if( activeItem == i ){
+    bool isSelected = ( activeIndex == i && item->isSelectable() );
+    
+    u8g2.setCursor(10, posY);
+    u8g2.print(item->getTitle());
+
+    if( isSelected ){
       u8g2.setFont(u8g2_font_open_iconic_all_1x_t);
       u8g2.drawStr(0, posY - 2, "o");
       u8g2.setFont(u8g2_font_mercutio_basic_nbp_t_all);
@@ -48,15 +68,19 @@ void Menu::render()
 
 void Menu::selectNextItem()
 {
-  activeItem++;
-
-  if( activeItem >= items.count() ){
-    activeItem = items.count() - 1;
+  if( activeIndex + 1 >= items->size() ){
+    return;
   }
+  
+  activeIndex++;
 
-  int top = ( activeItem * MENU_ITEM_SIZE ) + MENU_ITEM_SIZE + translateY;
+  /*MenuItem *item = items->get(activeIndex);
+  
+  if( ! item->isSelectable() ){
+    selectNextItem();
+  }*/
 
-  if( top > u8g2.getDisplayHeight() ){
+  if( getOffsetTop(activeIndex) > u8g2.getDisplayHeight() ){
     translateY -= MENU_ITEM_SIZE;
   }
 }
@@ -64,15 +88,18 @@ void Menu::selectNextItem()
 
 void Menu::selectPreviousItem()
 {
-  activeItem--;
+  activeIndex--;
 
-  if( activeItem < 0 ){
-    activeItem = 0;
-  }
-  
-  int top = ( activeItem * MENU_ITEM_SIZE ) + MENU_ITEM_SIZE + translateY;
+  if( activeIndex < 0 ){
+    activeIndex = 0;
+  }/*else{
+    MenuItem *item = items->get(activeIndex);
+    if( ! item->isSelectable() ){
+      selectPreviousItem();
+    }
+  }*/
 
-  if( top < MENU_ITEM_SIZE ){
+  if( getOffsetTop(activeIndex) < MENU_ITEM_SIZE ){
     translateY += MENU_ITEM_SIZE;
   }
 }
@@ -80,5 +107,5 @@ void Menu::selectPreviousItem()
 
 int Menu::getActiveIndex()
 {
-  return activeItem;
+  return activeIndex;
 }

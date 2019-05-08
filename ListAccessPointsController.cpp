@@ -1,9 +1,10 @@
 
 #include "ListAccessPointsController.h"
 
-ListAccessPointsController::ListAccessPointsController(U8G2 dsp)
+ListAccessPointsController::ListAccessPointsController(U8G2 _dsp)
 {
-
+  dsp = _dsp;
+  
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   
@@ -13,6 +14,8 @@ ListAccessPointsController::ListAccessPointsController(U8G2 dsp)
   menu.setDisplay(dsp);
   
   menu.addItem("Back");
+
+  Serial.println(n);
   
   if (n == 0) {
   } else {
@@ -25,12 +28,10 @@ ListAccessPointsController::ListAccessPointsController(U8G2 dsp)
       Serial.print(")");
       Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE) ? " " : "*");
       delay(10);*/
-      Serial.println(WiFi.SSID(i));
 
-      /**
-       * TODO: set menu.addItem param to string. move menu render function to u8g2.print() instead of drawStr
-       */
-      menu.addItem( const_cast<char*>(WiFi.SSID(i).c_str()) );
+      String ssidString = fixUtf8( WiFi.SSID(i) );      
+
+      menu.addItem( ssidString );
     }
   }
 
@@ -43,10 +44,14 @@ void ListAccessPointsController::render()
 }
 
 
-void ListAccessPointsController::buttonSelect(StackArray<BaseController *> *controllers)
+void ListAccessPointsController::buttonSelect(SimpleList<BaseController *> *controllers)
 {
   if( menu.getActiveIndex() == 0 ){
     controllers->pop();
+  }else{    
+    controllers->add(
+      new AccessPointDetailController(dsp, menu.getActiveIndex() - 1)
+    );
   }
 }
 

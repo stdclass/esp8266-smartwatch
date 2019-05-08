@@ -3,7 +3,7 @@
 #include "ESP8266WiFi.h"
 #include <Arduino.h>
 #include <U8g2lib.h>
-#include "StackArray.h"
+#include "SimpleList.h"
 #include "BaseController.h"
 #include "HomeController.h"
 
@@ -16,6 +16,7 @@
 
 // u8g2_font_open_iconic_all_1x_t
 // u8g2_font_open_iconic_all_2x_t
+
 /*
    m: arrow down
    n: arrow left
@@ -39,21 +40,20 @@ unsigned long buttonSWLastPressed = 0;
 
 
 
-HomeController *homeController;
-
-StackArray<BaseController *> controllers;
+SimpleList<BaseController *> controllerStack;
 
 void setup(void) {
   u8g2.begin();
+  u8g2.enableUTF8Print();  
   
   Serial.begin(115200);
 
   pinMode(BUTTON_X, INPUT);
   pinMode(BUTTON_SW, INPUT);
 
-  homeController = new HomeController(u8g2);
+  HomeController *homeController = new HomeController(u8g2);
 
-  controllers.push(homeController);
+  controllerStack.add(homeController);
 }
 
 
@@ -65,14 +65,12 @@ void setup(void) {
 
 void loop(void) {
 
-  BaseController *controller = controllers.peek();
+  BaseController *controller = controllerStack.getLast();
   controller->render();
   
   
   if( digitalRead(BUTTON_SW) == LOW && buttonSWDown == 0){
-    /*BaseController *newController = controller->buttonSelect();
-    controllers.push(newController);*/
-    controller->buttonSelect(&controllers);
+    controller->buttonSelect(&controllerStack);
     
     buttonSWDown = 1;
   }

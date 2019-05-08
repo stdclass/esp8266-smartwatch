@@ -1,9 +1,9 @@
 
 #include "AccessPointsController.h"
 
-AccessPointsController::AccessPointsController(U8G2 dsp)
+AccessPointsController::AccessPointsController(U8G2 _dsp)
 {
-  u8g2 = dsp;
+  dsp = _dsp;
   
   menu.setDisplay(dsp);
   
@@ -18,14 +18,14 @@ void AccessPointsController::render()
 }
 
 
-void AccessPointsController::buttonSelect(StackArray<BaseController *> *controllers)
+void AccessPointsController::buttonSelect(SimpleList<BaseController *> *controllers)
 {
   if( menu.getActiveIndex() == 0 ){
     controllers->pop();
   }
   if( menu.getActiveIndex() == 1 ){
-    controllers->push(
-      new ListAccessPointsController(u8g2)
+    controllers->add(
+      new ListAccessPointsController(dsp)
     );
   }
 }

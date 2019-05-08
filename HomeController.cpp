@@ -1,21 +1,15 @@
 
 #include "HomeController.h"
 
-HomeController::HomeController(U8G2 dsp)
+HomeController::HomeController(U8G2 _dsp)
 {
+  dsp = _dsp;
+  
   menu.setDisplay(dsp);
   
-  menu.addItem("Clock");
   menu.addItem("Access Points");
-  menu.addItem("Settings");
-  menu.addItem("Settings 2");
-  menu.addItem("Settings 3");
-  menu.addItem("Settings 4");
-  menu.addItem("Settings 5");
 
-  menuControllers.push(new AccessPointsController(dsp));
-  menuControllers.push(new AccessPointsController(dsp));
-  menuControllers.push(new AccessPointsController(dsp));
+  menuControllers.add(new AccessPointsController(dsp));
 }
 
 
@@ -26,10 +20,10 @@ void HomeController::render()
 }
 
 
-void HomeController::buttonSelect(StackArray<BaseController *> *controllers)
+void HomeController::buttonSelect(SimpleList<BaseController *> *controllers)
 {
-  controllers->push(
-    menuControllers.at(menu.getActiveIndex())
+  controllers->add(
+    menuControllers.get(menu.getActiveIndex())
   );
 }
 
