@@ -14,20 +14,6 @@
 #include <Wire.h>
 #endif
 
-// u8g2_font_open_iconic_all_1x_t
-// u8g2_font_open_iconic_all_2x_t
-
-/*
-   m: arrow down
-   n: arrow left
-   o: arrow right
-   p: arrow up
-
-   s: check mark
-*/
-
-
-// u8g2_font_mercutio_basic_nbp_t_all
 
 U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 
@@ -43,55 +29,48 @@ unsigned long buttonSWLastPressed = 0;
 SimpleList<BaseController *> controllerStack;
 
 void setup(void) {
-  u8g2.begin();
-  u8g2.enableUTF8Print();  
-  
-  Serial.begin(115200);
+    u8g2.begin();
+    u8g2.enableUTF8Print();
 
-  pinMode(BUTTON_X, INPUT);
-  pinMode(BUTTON_SW, INPUT);
+    Serial.begin(115200);
 
-  HomeController *homeController = new HomeController(u8g2);
+    pinMode(BUTTON_X, INPUT);
+    pinMode(BUTTON_SW, INPUT);
 
-  controllerStack.add(homeController);
+    HomeController *homeController = new HomeController(u8g2);
+
+    controllerStack.add(homeController);
 }
-
-
-
-
-
-
 
 
 void loop(void) {
 
-  BaseController *controller = controllerStack.getLast();
-  controller->render();
-  
-  
-  if( digitalRead(BUTTON_SW) == LOW && buttonSWDown == 0){
-    controller->buttonSelect(&controllerStack);
-    
-    buttonSWDown = 1;
-  }
-
-  if( digitalRead(BUTTON_SW) == HIGH ){
-    buttonSWDown = 0;
-  }
+    BaseController *controller = controllerStack.getLast();
+    controller->render();
 
 
-  int buttonXRaw = analogRead(BUTTON_X);
+    if( digitalRead(BUTTON_SW) == LOW && buttonSWDown == 0){
+        controller->buttonSelect(&controllerStack);
 
-  if ( buttonXRaw < 10 && buttonX != -1 ) {
-    buttonX = -1;
-    controller->buttonDown();
-    
-  } else if ( buttonXRaw > 1014 && buttonX != 1 ) {
-    buttonX = 1;
-    controller->buttonUp();
-    
-  } else if ( buttonX != 0 && buttonXRaw >= 10 && buttonXRaw <= 1014 ) {
-    buttonX = 0;
-  }
-  
+        buttonSWDown = 1;
+    }
+
+    if( digitalRead(BUTTON_SW) == HIGH ){
+        buttonSWDown = 0;
+    }
+
+    int buttonXRaw = analogRead(BUTTON_X);
+
+    if ( buttonXRaw < 10 && buttonX != -1 ) {
+        buttonX = -1;
+        controller->buttonDown();
+
+    } else if ( buttonXRaw > 1014 && buttonX != 1 ) {
+        buttonX = 1;
+        controller->buttonUp();
+
+    } else if ( buttonX != 0 && buttonXRaw >= 10 && buttonXRaw <= 1014 ) {
+        buttonX = 0;
+    }
+
 }

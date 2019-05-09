@@ -1,21 +1,19 @@
-#ifndef _MENUITEM_H
-#define _MENUITEM_H
+#ifndef _MENUITEMBACK_H
+#define _MENUITEMBACK_H
 
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include "BaseMenuItem.h"
 
-class MenuItem : public BaseMenuItem
+class MenuItemBack : public BaseMenuItem
 {
-    String title;
-    bool selectable;
     bool selected;
 
     public:
-        MenuItem(String _title, bool _selectable = true);
+        MenuItemBack();
         void setSelected(bool _selected);
         void render(U8G2 dsp, int posY);
         bool isFixed();
 };
 
-#endif // _MENUITEM_H
+#endif // _MENUITEMBACK_H

@@ -12,16 +12,16 @@
 
 class ListAccessPointsController : public BaseController
 {
-  private:
-    Menu menu;
-    U8G2 dsp;
+    private:
+        Menu menu;
+        U8G2 dsp;
 
-  public:
-    ListAccessPointsController(U8G2 _dsp);
-    void render();
-    void buttonSelect(SimpleList<BaseController *> *controllers);
-    void buttonDown();
-    void buttonUp();
+    public:
+        ListAccessPointsController(U8G2 _dsp);
+        void render();
+        void buttonSelect(SimpleList<BaseController *> *controllers);
+        void buttonDown();
+        void buttonUp();
 };
 
 

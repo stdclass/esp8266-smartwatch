@@ -5,107 +5,136 @@
 
 Menu::Menu()
 {
-  activeIndex = 0;
-  lastActiveIndex = -1;
-  translateY = 0;
+    translateY = 0;
+    activeIndex = 0;
+    hasBack = false;
+    title = "";
 
-  items = new SimpleList<MenuItem *>;
+    items = new SimpleList<BaseMenuItem *>;
 }
 
 int Menu::getOffsetTop(int itemIndex)
 {
-  return (MENU_ITEM_SIZE * itemIndex) + MENU_ITEM_SIZE + translateY;
+    return (MENU_ITEM_SIZE * itemIndex) + MENU_ITEM_SIZE + translateY;
 }
 
 void Menu::addItem(String title, bool selectable)
 {
-  MenuItem *item = new MenuItem(title, selectable);
-  
-  items->add(item);
+    MenuItem *item = new MenuItem(title, selectable);
+
+    items->add(item);
 }
 
-void Menu::setDisplay(U8G2 dsp)
+void Menu::addBack()
 {
-  u8g2 = dsp;
+    MenuItemBack *item = new MenuItemBack();
+
+    items->add(item);
+
+    hasBack = true;
+}
+
+void Menu::setTitle(String _title)
+{
+    title = _title;
+}
+
+void Menu::updateItem(int index, String title, bool selectable)
+{
+    MenuItem *item = new MenuItem(title, selectable);
+
+    items->replace(index, item);
+}
+
+void Menu::addLoading(bool loading)
+{
+    MenuItemLoading *item = new MenuItemLoading(loading);
+
+    items->add(item);
+}
+
+void Menu::startLoading(int index)
+{
+    MenuItemLoading *item = new MenuItemLoading(true);
+
+    items->replace(index, item);
+}
+
+void Menu::stopLoading(int index)
+{
+    MenuItemLoading *item = new MenuItemLoading(false);
+
+    items->replace(index, item);
+}
+
+void Menu::setDisplay(U8G2 _dsp)
+{
+    dsp = _dsp;
 }
 
 void Menu::render()
 {
+    dsp.clearBuffer();
+    dsp.setFont(u8g2_font_mercutio_basic_nbp_t_all);
 
-  if( lastActiveIndex == activeIndex ){
-    //return;
-  }
-
-  lastActiveIndex = activeIndex;
-  
-  u8g2.clearBuffer();
-  u8g2.setFont(u8g2_font_mercutio_basic_nbp_t_all);
-
-  for( int i = 0; i < items->size(); i++ ){
-    
-    int posY = getOffsetTop(i);
-
-    if( posY < 0 || posY > ( u8g2.getDisplayHeight() ) ){
-      continue;
+    if( title != "" ){
+        int titleWidth = dsp.getStrWidth(title.c_str());
+        dsp.setCursor(dsp.getDisplayWidth() - titleWidth, MENU_ITEM_SIZE - 5);
+        dsp.print(title.substring(0,15));
     }
-    
-    MenuItem *item = items->get(i);
 
-    bool isSelected = ( activeIndex == i && item->isSelectable() );
-    
-    u8g2.setCursor(10, posY);
-    u8g2.print(item->getTitle());
+    int minTopPosition = hasBack ? MENU_ITEM_SIZE + 5 : 0;
 
-    if( isSelected ){
-      u8g2.setFont(u8g2_font_open_iconic_all_1x_t);
-      u8g2.drawStr(0, posY - 2, "o");
-      u8g2.setFont(u8g2_font_mercutio_basic_nbp_t_all);
+    for( int i = 0; i < items->size(); i++ ){
+
+        int posY = (MENU_ITEM_SIZE * i) + MENU_ITEM_SIZE + translateY;
+
+        BaseMenuItem *item = items->get(i);
+
+        if( ( posY < minTopPosition || posY > ( dsp.getDisplayHeight() ) ) && ! item->isFixed() ){
+            continue;
+        }
+
+
+        item->setSelected(activeIndex == i);
+        item->render(dsp, posY);
+
     }
-  }
 
-  u8g2.sendBuffer();
+    dsp.sendBuffer();
 }
 
 void Menu::selectNextItem()
 {
-  if( activeIndex + 1 >= items->size() ){
-    return;
-  }
-  
-  activeIndex++;
+    if( activeIndex + 1 >= items->size() ){
+        return;
+    }
 
-  /*MenuItem *item = items->get(activeIndex);
-  
-  if( ! item->isSelectable() ){
-    selectNextItem();
-  }*/
+    activeIndex++;
 
-  if( getOffsetTop(activeIndex) > u8g2.getDisplayHeight() ){
-    translateY -= MENU_ITEM_SIZE;
-  }
+    if( getOffsetTop(activeIndex) > dsp.getDisplayHeight() ){
+        translateY -= MENU_ITEM_SIZE;
+    }
 }
 
 
 void Menu::selectPreviousItem()
 {
-  activeIndex--;
+    activeIndex--;
 
-  if( activeIndex < 0 ){
-    activeIndex = 0;
-  }/*else{
-    MenuItem *item = items->get(activeIndex);
-    if( ! item->isSelectable() ){
-      selectPreviousItem();
+    if( activeIndex < 0 ){
+        activeIndex = 0;
     }
-  }*/
 
-  if( getOffsetTop(activeIndex) < MENU_ITEM_SIZE ){
-    translateY += MENU_ITEM_SIZE;
-  }
+    int threshold = hasBack ? MENU_ITEM_SIZE + 5 : MENU_ITEM_SIZE;
+
+    if( activeIndex > 0 && getOffsetTop(activeIndex) < threshold ){
+        translateY += MENU_ITEM_SIZE;
+    }
 }
 
 
 int Menu::getActiveIndex()
 {
-  return activeIndex;
+    return activeIndex;
 }

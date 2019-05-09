@@ -2,18 +2,35 @@
 #include "MenuItem.h"
 
 
-MenuItem::MenuItem(String _title, bool _selectable )
+MenuItem::MenuItem(String _title, bool _selectable)
 {
-  title = _title;
-  selectable = _selectable;
+    title = _title;
+    selectable = _selectable;
+    selected = false;
 }
 
-String MenuItem::getTitle()
+void MenuItem::setSelected(bool _selected)
 {
-  return title;
+    selected = _selected;
 }
 
-bool MenuItem::isSelectable()
+void MenuItem::render(U8G2 dsp, int posY)
 {
-  return selectable;
+    dsp.setCursor(10, posY);
+    dsp.print(title);
+
+    if( selected ){
+        if( selectable ){
+            dsp.setFont(u8g2_font_open_iconic_all_1x_t);
+            dsp.drawStr(0, posY - 1, "o");
+            dsp.setFont(u8g2_font_mercutio_basic_nbp_t_all);
+        }else{
+            dsp.drawUTF8(2, posY, "·");
+        }
+    }
+}
+
+bool MenuItem::isFixed()
+{
+    return false;
 }

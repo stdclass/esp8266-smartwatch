@@ -1,23 +1,20 @@
-#ifndef _HOMECONTROLLER_H
-#define _HOMECONTROLLER_H
+#ifndef _CLOCKCONTROLLER_H
+#define _CLOCKCONTROLLER_H
 
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include "BaseController.h"
-#include "Menu.h"
 #include "SimpleList.h"
-#include "ClockController.h"
-#include "ListAccessPointsController.h"
 
-class HomeController : public BaseController
+class ClockController : public BaseController
 {
     private:
-        Menu menu;
         U8G2 dsp;
-        SimpleList<BaseController *> menuControllers;
+        int hours;
+        int minutes;
 
     public:
-        HomeController(U8G2 _dsp);
+        ClockController(U8G2 _dsp);
         void render();
         void buttonSelect(SimpleList<BaseController *> *controllers);
         void buttonDown();
